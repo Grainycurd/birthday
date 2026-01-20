@@ -1,7 +1,11 @@
 const { Telegraf, Scenes, session, Markup } = require('telegraf');
 
-const BOT_TOKEN = '7963356079:AAGYTgrVUQnEMRTaPFizio_pYSo4AndhrPg';
+// Используем переменную окружения для токена
+const BOT_TOKEN = process.env.BOT_TOKEN;
 
+if (!BOT_TOKEN) {
+    throw new Error('Please set BOT_TOKEN in environment variables');
+}
 
 const bot = new Telegraf(BOT_TOKEN);
 
@@ -10,7 +14,7 @@ const bot = new Telegraf(BOT_TOKEN);
 const questScene = new Scenes.WizardScene(
     'quest',
 
-    // ШАГ 1. Отправляем первый вопрос (на /start)
+    // ШАГ 1. Первый вопрос
     async (ctx) => {
         await ctx.reply(
             'Привет.\nПодтверди, пожалуйста:\nТы Валерия и у тебя сегодня день рождения?',
@@ -29,8 +33,6 @@ const questScene = new Scenes.WizardScene(
         const answer = ctx.callbackQuery.data;
 
         if (answer === 'confirm_yes') {
-            ctx.scene.session.confirm = true;
-
             await ctx.editMessageText('Отлично. Тогда начнём маленький квест.');
 
             // ШАГ 2. Выбор собаки
@@ -45,7 +47,7 @@ const questScene = new Scenes.WizardScene(
             return ctx.wizard.next();
 
         } else {
-            // Неправильный ответ → повторяем вопрос
+            // Повтор вопроса
             await ctx.editMessageText(
                 'Хм… кажется, без тебя этот квест не имеет смысла.'
             );
@@ -58,56 +60,53 @@ const questScene = new Scenes.WizardScene(
                 ])
             );
 
-            // Остаёмся на этом же шаге
             return;
         }
     },
 
-    // ШАГ 2. Обработка выбора собаки
+    // ШАГ 2. Обработка выбора собаки (с картинками с GitHub)
     async (ctx) => {
         if (!ctx.callbackQuery) return;
 
         const dog = ctx.callbackQuery.data;
-        ctx.scene.session.dog = dog;
 
         if (dog === 'dog_dinya') {
-            await ctx.editMessageText('Конечно. Дыня — это отдельная любовь.');
-
-            // ВЕТКА ДЫНЯ
-            await ctx.reply(
-                'А какая у неё самая любимая игрушка?',
-                Markup.inlineKeyboard([
-                    [Markup.button.callback('Зелёная палка', 'toy_stick')],
-                    [Markup.button.callback('Синее колечко', 'toy_ring')],
-                    [Markup.button.callback('Розовый мячик', 'toy_ball')]
-                ])
+            // Картинка Дыни с GitHub Raw URL
+            await ctx.replyWithPhoto(
+                { url: 'https://raw.githubusercontent.com/Grainycurd/photobank/main/img/melon.png' },
+                {
+                    caption: 'Конечно. Дыня — это отдельная любовь.\n\nА какая у неё самая любимая игрушка?',
+                    ...Markup.inlineKeyboard([
+                        [Markup.button.callback('Зелёная палка', 'toy_stick')],
+                        [Markup.button.callback('Синее колечко', 'toy_ring')],
+                        [Markup.button.callback('Розовый мячик', 'toy_ball')]
+                    ])
+                }
             );
-        } else {
-            await ctx.editMessageText('Нори. Тут без вариантов.');
 
-            // ВЕТКА НОРИ
-            await ctx.reply(
-                'А чего Нори боится больше всего?',
-                Markup.inlineKeyboard([
-                    [Markup.button.callback('Пакета', 'fear_bag')],
-                    [Markup.button.callback('Людей', 'fear_people')],
-                    [Markup.button.callback('Листика', 'fear_leaf')]
-                ])
+        } else {
+            // Картинка Нори с GitHub Raw URL
+            await ctx.replyWithPhoto(
+                { url: 'https://raw.githubusercontent.com/Grainycurd/photobank/main/img/nori.png' },
+                {
+                    caption: 'Нори. Тут без вариантов.\n\nА чего Нори боится больше всего?',
+                    ...Markup.inlineKeyboard([
+                        [Markup.button.callback('Пакета', 'fear_bag')],
+                        [Markup.button.callback('Людей', 'fear_people')],
+                        [Markup.button.callback('Листика', 'fear_leaf')]
+                    ])
+                }
             );
         }
 
         return ctx.wizard.next();
     },
 
-    // ШАГ 3. Обработка ветки Дыня / Нори
+    // ШАГ 3. Обработка ответа по Дыне / Нори
     async (ctx) => {
         if (!ctx.callbackQuery) return;
 
-        ctx.scene.session.secondAnswer = ctx.callbackQuery.data;
-
-        await ctx.editMessageText(
-            'Ты удивительно хорошо помнишь такие мелочи.'
-        );
+        await ctx.reply('Ты удивительно хорошо помнишь такие мелочи.');
 
         // ШАГ 4. Первый месседж
         await ctx.reply(
@@ -123,36 +122,29 @@ const questScene = new Scenes.WizardScene(
         return ctx.wizard.next();
     },
 
-    // ШАГ 4. Обработка первого сообщения (с повтором при ошибке)
+    // ШАГ 4. Обработка первого сообщения (с повтором)
     async (ctx) => {
         if (!ctx.callbackQuery) return;
 
         const firstMsg = ctx.callbackQuery.data;
-
-        // ПРАВИЛЬНЫЙ ОТВЕТ
         const CORRECT = 'first_1';
 
         if (firstMsg === CORRECT) {
-            // Правильный вариант
-            await ctx.editMessageText(
-                'Именно так. С этого всё и началось.'
-            );
+            await ctx.editMessageText('Именно так. С этого всё и началось.');
 
             // ШАГ 5. Подарок
             await ctx.reply(
                 'А теперь самое главное.\n' +
-                'След квест\n\n' +
-                '📍 Под вентилятором.\n\n' +
-                'На этом я ботАнтон с тобой прощается и С днём рождения, Валерия.'
+                'Твой подарок лежит:\n\n' +
+                '📍 В верхнем ящике стола в спальне.\n\n' +
+                'С днём рождения, Валерия.'
             );
 
             return ctx.scene.leave();
 
         } else {
-            // Неправильный вариант → повторяем вопрос
-            await ctx.editMessageText(
-                'Это было близко… но давай попробуем ещё раз.'
-            );
+            // Повтор вопроса
+            await ctx.editMessageText('Это было близко… но давай попробуем ещё раз.');
 
             await ctx.reply(
                 'Какое сообщение ты написала мне самым первым?',
@@ -164,7 +156,6 @@ const questScene = new Scenes.WizardScene(
                 ])
             );
 
-            // Остаёмся на этом же шаге
             return;
         }
     }
@@ -177,18 +168,17 @@ const stage = new Scenes.Stage([questScene]);
 bot.use(session());
 bot.use(stage.middleware());
 
-// ---------- КОМАНДА /start ----------
+// ---------- /start ----------
 
 bot.start((ctx) => {
     ctx.scene.enter('quest');
 });
 
-// ---------- ЗАПУСК БОТА ----------
+// ---------- ЗАПУСК ----------
 
 bot.launch();
 
 console.log('Bot started');
 
-// Корректное завершение
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
