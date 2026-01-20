@@ -135,7 +135,7 @@ const questScene = new Scenes.WizardScene(
         const CORRECT = 'first_1';
 
         if (firstMsg === CORRECT) {
-            await ctx.reply('Именно так. С этого всё и началось.');
+            await ctx.reply('Именно так. С этого всё и началось у нас.');
 
             await ctx.reply(
                 'А теперь самое главное\n' +
