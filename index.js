@@ -1,6 +1,6 @@
 const { Telegraf, Scenes, session, Markup } = require('telegraf');
 
-// Токен берём из переменной окружения
+// Токен бота из переменной окружения
 const BOT_TOKEN = process.env.BOT_TOKEN;
 if (!BOT_TOKEN) {
     throw new Error('Please set BOT_TOKEN in environment variables');
@@ -28,13 +28,15 @@ const questScene = new Scenes.WizardScene(
     async (ctx) => {
         if (!ctx.callbackQuery) return;
         await ctx.answerCbQuery();
+        if (ctx.callbackQuery.message) {
+            try { await ctx.editMessageReplyMarkup({ inline_keyboard: [] }); } catch { }
+        }
 
         const answer = ctx.callbackQuery.data;
 
         if (answer === 'confirm_yes') {
-            await ctx.editMessageText('Отлично. Тогда начнём маленький квест.');
+            await ctx.reply('Отлично. Тогда начнём маленький квест.');
 
-            // ШАГ 2. Выбор собаки
             await ctx.reply(
                 'Кто твоя самая любимая собака?',
                 Markup.inlineKeyboard([
@@ -46,12 +48,9 @@ const questScene = new Scenes.WizardScene(
             return ctx.wizard.next();
 
         } else {
-            await ctx.editMessageText(
-                'Хм… кажется, без тебя этот квест не имеет смысла.'
-            );
-
             await ctx.reply(
-                'Подтверди, пожалуйста:\nТы Валерия и у тебя сегодня день рождения?',
+                'Хм… кажется, без тебя этот квест не имеет смысла.\n' +
+                'Попробуй ещё раз подтвердить, пожалуйста.',
                 Markup.inlineKeyboard([
                     [Markup.button.callback('Да, это я', 'confirm_yes')],
                     [Markup.button.callback('Кажется, вы ошиблись', 'confirm_no')]
@@ -62,10 +61,13 @@ const questScene = new Scenes.WizardScene(
         }
     },
 
-    // ШАГ 2. Обработка выбора собаки с картинками
+    // ШАГ 2. Обработка выбора собаки
     async (ctx) => {
         if (!ctx.callbackQuery) return;
         await ctx.answerCbQuery();
+        if (ctx.callbackQuery.message) {
+            try { await ctx.editMessageReplyMarkup({ inline_keyboard: [] }); } catch { }
+        }
 
         const dog = ctx.callbackQuery.data;
 
@@ -81,7 +83,6 @@ const questScene = new Scenes.WizardScene(
                     ])
                 }
             );
-
         } else {
             await ctx.replyWithPhoto(
                 { url: 'https://raw.githubusercontent.com/Grainycurd/photobank/main/img/nori1.png' },
@@ -103,10 +104,12 @@ const questScene = new Scenes.WizardScene(
     async (ctx) => {
         if (!ctx.callbackQuery) return;
         await ctx.answerCbQuery();
+        if (ctx.callbackQuery.message) {
+            try { await ctx.editMessageReplyMarkup({ inline_keyboard: [] }); } catch { }
+        }
 
         await ctx.reply('Ты удивительно хорошо помнишь такие мелочи.');
 
-        // ШАГ 4. Вопрос о первом сообщении
         await ctx.reply(
             'А теперь вопрос посложнее.\nКакое сообщение ты написала мне самым первым?',
             Markup.inlineKeyboard([
@@ -124,12 +127,15 @@ const questScene = new Scenes.WizardScene(
     async (ctx) => {
         if (!ctx.callbackQuery) return;
         await ctx.answerCbQuery();
+        if (ctx.callbackQuery.message) {
+            try { await ctx.editMessageReplyMarkup({ inline_keyboard: [] }); } catch { }
+        }
 
         const firstMsg = ctx.callbackQuery.data;
         const CORRECT = 'first_1';
 
         if (firstMsg === CORRECT) {
-            await ctx.editMessageText('Именно так. С этого всё и началось.');
+            await ctx.reply('Именно так. С этого всё и началось.');
 
             await ctx.reply(
                 'А теперь самое главное.\n' +
@@ -141,7 +147,7 @@ const questScene = new Scenes.WizardScene(
             return ctx.scene.leave();
 
         } else {
-            await ctx.editMessageText('Это было близко… но давай попробуем ещё раз.');
+            await ctx.reply('Это было близко… но давай попробуем ещё раз.');
 
             await ctx.reply(
                 'Какое сообщение ты написала мне самым первым?',
