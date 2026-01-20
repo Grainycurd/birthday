@@ -73,7 +73,9 @@ const questScene = new Scenes.WizardScene(
         if (dog === 'dog_dinya') {
             // Картинка Дыни с GitHub Raw URL
             await ctx.replyWithPhoto(
-                { url: 'https://github.com/Grainycurd/photobank/blob/f5706fd33743ef0383d2b8c9ebab748ce9107993/img/%20aaaamelon-2.png' },
+                {
+                    url: 'https://raw.githubusercontent.com/Grainycurd/photobank/main/img/melonn.png'
+                },
                 {
                     caption: 'Конечно. Дыня — это отдельная любовь.\n\nА какая у неё самая любимая игрушка?',
                     ...Markup.inlineKeyboard([
