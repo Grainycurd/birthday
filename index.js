@@ -74,7 +74,7 @@ const questScene = new Scenes.WizardScene(
             // Картинка Дыни с GitHub Raw URL
             await ctx.replyWithPhoto(
                 {
-                    url: 'https://raw.githubusercontent.com/Grainycurd/photobank/main/img/melonn.png'
+                    url: 'https://raw.githubusercontent.com/Grainycurd/photobank/main/img/melon1.png'
                 },
                 {
                     caption: 'Конечно. Дыня — это отдельная любовь.\n\nА какая у неё самая любимая игрушка?',
@@ -89,7 +89,7 @@ const questScene = new Scenes.WizardScene(
         } else {
             // Картинка Нори с GitHub Raw URL
             await ctx.replyWithPhoto(
-                { url: 'https://raw.githubusercontent.com/Grainycurd/photobank/main/img/nori.png' },
+                { url: 'https://raw.githubusercontent.com/Grainycurd/photobank/main/img/nori1.png' },
                 {
                     caption: 'Нори. Тут без вариантов.\n\nА чего Нори боится больше всего?',
                     ...Markup.inlineKeyboard([
@@ -138,8 +138,8 @@ const questScene = new Scenes.WizardScene(
             await ctx.reply(
                 'А теперь самое главное.\n' +
                 'Твой подарок лежит:\n\n' +
-                '📍 В верхнем ящике стола в спальне.\n\n' +
-                'С днём рождения, Валерия.'
+                '📍 за Дыней.\n\n' +
+                'С днём рождения ❤️.'
             );
 
             return ctx.scene.leave();
